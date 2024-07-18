@@ -1,11 +1,17 @@
-import { Module } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { Module, MiddlewareConsumer } from '@nestjs/common';
 import { UsersController } from './users.controller';
-import { PrismaModule } from '../prisma/prisma.module';
+import { UsersService } from './users.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { AuthMiddleware } from '../middleware/authMiddleware';
 
 @Module({
-  imports: [PrismaModule],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, PrismaService],
 })
-export class UsersModule {}
+export class UsersModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+        .apply(AuthMiddleware)
+        .forRoutes(UsersController);
+  }
+}

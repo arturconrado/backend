@@ -12,6 +12,10 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# Firebase service account key
+config/firebaseServiceAccountKey.json
+
+
 # OS
 .DS_Store
 
