@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import {auth} from "../firebaseAdminConfig";
 
 interface AuthenticatedRequest extends Request {
-    user?: any; // Adiciona a propriedade 'user' ao tipo Request
+    user?: any;
 }
 
 @Injectable()

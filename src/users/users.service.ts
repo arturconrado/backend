@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
 import {CreateUserDto} from "./dto/create-user.dto";
@@ -56,6 +56,6 @@ export class UsersService {
         if (user && (await bcrypt.compare(password, user.password))) {
             return user;
         }
-        throw new Error('Invalid credentials');
+        throw new UnauthorizedException('Invalid credentials');
     }
 }

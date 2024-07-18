@@ -9,14 +9,14 @@ generator client {
 }
 
 model User {
-  id         Int       @id @default(autoincrement())
-  email      String    @unique
-  password   String
-  name       String?
-  services   Service[]
-  schedules  Schedule[]
-  role       Role      @default(USER)
-  firebaseUid String   @unique
+  id          Int       @id @default(autoincrement())
+  email       String    @unique
+  password    String
+  name        String?
+  services    Service[]
+  schedules   Schedule[]
+  role        Role      @default(USER)
+  firebaseUid String    @unique
 }
 
 model Professional {
@@ -30,14 +30,15 @@ model Professional {
 }
 
 model Service {
-  id            Int           @id @default(autoincrement())
-  title         String
-  description   String
-  userId        Int
+  id             Int           @id @default(autoincrement())
+  title          String
+  description    String
+  price          Float
+  userId         Int
   professionalId Int
-  user          User          @relation(fields: [userId], references: [id])
-  professional  Professional  @relation(fields: [professionalId], references: [id])
-  schedules     Schedule[]
+  user           User          @relation(fields: [userId], references: [id])
+  professional   Professional  @relation(fields: [professionalId], references: [id])
+  schedules      Schedule[]
 }
 
 model Schedule {

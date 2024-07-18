@@ -1,4 +1,4 @@
-import { Module, MiddlewareConsumer } from '@nestjs/common';
+import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -12,6 +12,9 @@ export class UsersModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
         .apply(AuthMiddleware)
-        .forRoutes(UsersController);
+        .forRoutes(
+            { path: 'users/verify', method: RequestMethod.POST },
+            // Adicione outras rotas protegidas aqui, se necessário
+        );
   }
 }
