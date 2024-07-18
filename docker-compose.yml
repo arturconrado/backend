@@ -6,27 +6,14 @@ services:
     container_name: mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: Aqwe123!@
+      MYSQL_ROOT_PASSWORD: Aqwe123
       MYSQL_DATABASE: bicos
       MYSQL_USER: artur
-      MYSQL_PASSWORD: Aqwe123!@
+      MYSQL_PASSWORD: Aqwe123
     ports:
-      - "3307:3306"  # Mudança da porta no host para 3307
+      - "3308:3306"  # Porta 3308 no host mapeada para a porta 3306 no contêiner
     volumes:
       - mysql-data:/var/lib/mysql
-
-  backend:
-    build: .
-    container_name: backend
-    restart: always
-    environment:
-      DATABASE_URL: "mysql://root:Aqwe123!@@mysql:3306/bicos"
-    ports:
-      - "3000:3000"
-    depends_on:
-      - mysql
-    volumes:
-      - .:/usr/src/app
 
 volumes:
   mysql-data:

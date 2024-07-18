@@ -1,9 +1,9 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
-import {CreateUserDto} from "./dto/create-user.dto";
-import {auth} from "../firebaseAdminConfig";
-import {UpdateUserDto} from "./dto/update-user.dto";
+import { CreateUserDto } from './dto/create-user.dto';
+import { auth } from '../firebaseAdminConfig';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -28,20 +28,20 @@ export class UsersService {
         return this.prisma.user.findMany();
     }
 
-    async findOne(id: number) {
+    async findOne(id: string) {
         return this.prisma.user.findUnique({
             where: { id },
         });
     }
 
-    async update(id: number, data: UpdateUserDto) {
+    async update(id: string, data: UpdateUserDto) {
         return this.prisma.user.update({
             where: { id },
             data,
         });
     }
 
-    async remove(id: number) {
+    async remove(id: string) {
         const user = await this.prisma.user.findUnique({ where: { id } });
         if (user) {
             await auth.deleteUser(user.firebaseUid);
@@ -53,7 +53,7 @@ export class UsersService {
 
     async login(email: string, password: string) {
         const user = await this.prisma.user.findUnique({ where: { email } });
-        if (user && (await bcrypt.compare(password, user.password))) {
+        if (user && user.password && (await bcrypt.compare(password, user.password))) {
             return user;
         }
         throw new UnauthorizedException('Invalid credentials');

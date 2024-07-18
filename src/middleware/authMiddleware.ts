@@ -1,6 +1,6 @@
 import { Injectable, NestMiddleware, UnauthorizedException } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-import {auth} from "../firebaseAdminConfig";
+import { auth } from '../firebaseAdminConfig';
 
 interface AuthenticatedRequest extends Request {
     user?: any;
@@ -10,6 +10,7 @@ interface AuthenticatedRequest extends Request {
 export class AuthMiddleware implements NestMiddleware {
     async use(req: AuthenticatedRequest, res: Response, next: NextFunction) {
         const token = req.headers.authorization?.split('Bearer ')[1];
+        console.log('Token recebido:', token);
 
         if (!token) {
             throw new UnauthorizedException('No token provided');
@@ -17,9 +18,11 @@ export class AuthMiddleware implements NestMiddleware {
 
         try {
             const decodedToken = await auth.verifyIdToken(token);
+            console.log('Token decodificado:', decodedToken);
             req.user = decodedToken;
             next();
-        } catch (error) {
+        } catch (error: any) {
+            console.log('Erro na verificação do token:', error.message);
             throw new UnauthorizedException('Invalid token');
         }
     }

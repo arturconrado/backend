@@ -1,7 +1,6 @@
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
-  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 generator client {
@@ -9,14 +8,14 @@ generator client {
 }
 
 model User {
-  id          Int       @id @default(autoincrement())
-  email       String    @unique
-  password    String
+  id          String     @id @default(uuid())
+  email       String     @unique
+  password    String?
   name        String?
   services    Service[]
   schedules   Schedule[]
-  role        Role      @default(USER)
-  firebaseUid String    @unique
+  role        Role       @default(USER)
+  firebaseUid String     @unique
 }
 
 model Professional {
@@ -34,10 +33,10 @@ model Service {
   title          String
   description    String
   price          Float
-  userId         Int
-  professionalId Int
+  userId         String
+  professionalId Int?
   user           User          @relation(fields: [userId], references: [id])
-  professional   Professional  @relation(fields: [professionalId], references: [id])
+  professional   Professional? @relation(fields: [professionalId], references: [id])
   schedules      Schedule[]
 }
 
@@ -46,7 +45,7 @@ model Schedule {
   title           String
   description     String
   date            DateTime
-  userId          Int
+  userId          String
   user            User          @relation(fields: [userId], references: [id])
   professionalId  Int?
   professional    Professional? @relation(fields: [professionalId], references: [id])
