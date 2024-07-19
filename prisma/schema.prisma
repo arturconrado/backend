@@ -10,30 +10,30 @@ generator client {
 model User {
   id            String     @id @default(uuid())
   email         String     @unique
-  password      String?
+  password      String
   name          String?
   latitude      Float?
   longitude     Float?
+  role          Role       @default(USER)
   services      Service[]
   schedules     Schedule[]
-  feedbacks     Feedback[] // Feedbacks given by the user
+  feedbacks     Feedback[]
   receivedFeedbacks Feedback[] @relation("ReceivedFeedbacks")
-  role          Role       @default(USER)
 }
 
 model Professional {
   id              String       @id @default(uuid())
-  name            String
   email           String       @unique
   password        String
+  name            String?
   profession      String
   latitude        Float?
   longitude       Float?
-  schedules       Schedule[]
+  role            Role         @default(PROFESSIONAL)
   services        Service[]
+  schedules       Schedule[]
   feedbacks       Feedback[]
   receivedFeedbacks Feedback[] @relation("ProfessionalReceivedFeedbacks")
-  role            Role         @default(PROFESSIONAL)
 }
 
 model Service {

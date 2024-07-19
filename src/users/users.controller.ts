@@ -1,13 +1,9 @@
-import { Controller, Post, Put, Body, Req, UnauthorizedException, Param } from '@nestjs/common';
-import { Request } from 'express';
+import { Controller, Post, Put, Body, Param } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto, LoginUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-
-interface AuthenticatedRequest extends Request {
-    user?: any;
-}
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Role } from '@prisma/client';
 
 @ApiTags('Users')
 @Controller('users')
@@ -15,7 +11,7 @@ export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
     @Post('register')
-    @ApiOperation({ summary: 'Register a new user' })
+    @ApiOperation({ summary: 'Register a new user or professional' })
     @ApiResponse({ status: 201, description: 'User successfully registered.' })
     @ApiResponse({ status: 400, description: 'Invalid input.' })
     async register(@Body() createUserDto: CreateUserDto) {
@@ -23,11 +19,11 @@ export class UsersController {
     }
 
     @Post('login')
-    @ApiOperation({ summary: 'Login a user' })
+    @ApiOperation({ summary: 'Login a user or professional' })
     @ApiResponse({ status: 200, description: 'User successfully logged in.' })
     @ApiResponse({ status: 401, description: 'Invalid credentials.' })
-    async login(@Body() loginUserDto: LoginUserDto) {
-        return this.usersService.login(loginUserDto.email, loginUserDto.password);
+    async login(@Body() loginUserDto: LoginUserDto, @Body('role') role: Role) {
+        return this.usersService.login(loginUserDto.email, loginUserDto.password, role);
     }
 
     @Put(':id')
@@ -35,7 +31,7 @@ export class UsersController {
     @ApiResponse({ status: 200, description: 'User successfully updated.' })
     @ApiResponse({ status: 400, description: 'Invalid input.' })
     @ApiResponse({ status: 404, description: 'User not found.' })
-    async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-        return this.usersService.update(id, updateUserDto);
+    async updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+        return this.usersService.updateUser(id, updateUserDto);
     }
 }
