@@ -17,7 +17,7 @@ export class ServicesController {
     @ApiResponse({ status: 201, description: 'Service successfully created.' })
     @ApiResponse({ status: 401, description: 'User not authenticated.' })
     create(@Body() createServiceDto: CreateServiceDto, @Req() req: any) {
-        return this.servicesService.create(createServiceDto);
+        return this.servicesService.create(createServiceDto, req.user.id);
     }
 
     @Get()

@@ -9,12 +9,13 @@ export class AuthMiddleware implements NestMiddleware {
     async use(req: Request, res: Response, next: NextFunction) {
         const authHeader = req.headers.authorization;
         if (!authHeader) {
-            throw new UnauthorizedException('Authorization header is missing');
+            throw new UnauthorizedException('No token provided');
         }
 
-        const token = authHeader.split(' ')[1];
+        const [, token] = authHeader.split(' ');
+
         try {
-            const decoded = this.jwtService.verify(token, { secret: process.env.JWT_SECRET || 'defaultSecret' });
+            const decoded = this.jwtService.verify(token);
             req.user = decoded;
             next();
         } catch (err) {

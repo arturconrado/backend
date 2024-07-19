@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsOptional, IsDate } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
 
 export class CreateScheduleDto {
     @ApiProperty({ example: 'Fix kitchen sink', description: 'The title of the schedule' })
@@ -13,9 +13,9 @@ export class CreateScheduleDto {
     description!: string;
 
     @ApiProperty({ example: '2023-07-20T14:30:00Z', description: 'The date and time of the schedule' })
-    @IsDate()
+    @IsString() // Use string para facilitar a manipulação de datas
     @IsNotEmpty()
-    date!: Date;
+    date!: string;
 
     @ApiProperty({ example: 'user123', description: 'The ID of the user requesting the schedule' })
     @IsString()

@@ -49,13 +49,14 @@ model Service {
   professional   Professional? @relation(fields: [professionalId], references: [id])
   schedules      Schedule[]
   feedbacks      Feedback[]
+  date           String
 }
 
 model Schedule {
   id              String        @id @default(uuid())
   title           String
   description     String
-  date            DateTime
+  date            String
   userId          String
   user            User          @relation(fields: [userId], references: [id])
   professionalId  String?

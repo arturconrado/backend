@@ -17,10 +17,6 @@ export class CreateServiceDto {
     @IsNotEmpty()
     price!: number;
 
-    @ApiProperty({ example: 'user123', description: 'The ID of the user requesting the service' })
-    @IsString()
-    @IsNotEmpty()
-    userId!: string;
 
     @ApiProperty({ example: '456', description: 'The ID of the professional assigned to the service', required: false })
     @IsString()
@@ -28,7 +24,7 @@ export class CreateServiceDto {
     professionalId?: string;
 
     @ApiProperty({ example: '2023-07-20T14:30:00Z', description: 'The date and time of the service' })
-    @IsDateString()
+    @IsString() // Ensure it's `string` not `String`
     @IsNotEmpty()
-    date!: string; // Use string para facilitar a manipulação de datas
+    date!: string;
 }
