@@ -28,6 +28,6 @@ export class FeedbackController {
     @ApiResponse({ status: 200, description: 'Feedback successfully retrieved.' })
     @ApiResponse({ status: 404, description: 'Feedback not found.' })
     findOne(@Param('id') id: string) {
-        return this.feedbackService.findOne(+id);
+        return this.feedbackService.findOne(id); // Alterado para string
     }
 }

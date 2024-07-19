@@ -1,24 +1,27 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsNumber, IsDate } from 'class-validator';
+import { IsOptional, IsString, IsDateString } from 'class-validator';
 
 export class UpdateScheduleDto {
-    @ApiProperty({ example: 'Fix kitchen sink', description: 'The title of the schedule', required: false })
-    @IsString()
     @IsOptional()
+    @IsString()
     title?: string;
 
-    @ApiProperty({ example: 'Fix the leaking kitchen sink', description: 'The description of the schedule', required: false })
-    @IsString()
     @IsOptional()
+    @IsString()
     description?: string;
 
-    @ApiProperty({ example: '2023-07-20T14:30:00Z', description: 'The date and time of the schedule', required: false })
-    @IsDate()
     @IsOptional()
-    date?: Date;
+    @IsDateString()
+    date?: string;
 
-    @ApiProperty({ example: 456, description: 'The ID of the professional assigned to the schedule', required: false })
-    @IsNumber()
     @IsOptional()
-    professionalId?: number;
+    @IsString()
+    userId?: string;
+
+    @IsOptional()
+    @IsString()
+    professionalId?: string;
+
+    @IsOptional()
+    @IsString()
+    serviceId?: string;
 }

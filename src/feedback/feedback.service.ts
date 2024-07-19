@@ -1,4 +1,3 @@
-// src/feedback/feedback.service.ts
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateFeedbackDto } from './dto/create-feedback.dto';
@@ -9,7 +8,10 @@ export class FeedbackService {
 
     async create(createFeedbackDto: CreateFeedbackDto) {
         return this.prisma.feedback.create({
-            data: createFeedbackDto,
+            data: {
+                ...createFeedbackDto,
+                serviceId: createFeedbackDto.serviceId ? createFeedbackDto.serviceId.toString() : null,
+            },
         });
     }
 
@@ -17,7 +19,7 @@ export class FeedbackService {
         return this.prisma.feedback.findMany();
     }
 
-    async findOne(id: number) {
+    async findOne(id: string) {
         return this.prisma.feedback.findUnique({
             where: { id },
         });

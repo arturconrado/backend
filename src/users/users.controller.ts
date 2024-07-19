@@ -3,7 +3,6 @@ import { Request } from 'express';
 import { UsersService } from './users.service';
 import { CreateUserDto, LoginUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { auth } from '../firebaseAdminConfig';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
 interface AuthenticatedRequest extends Request {
@@ -28,30 +27,7 @@ export class UsersController {
     @ApiResponse({ status: 200, description: 'User successfully logged in.' })
     @ApiResponse({ status: 401, description: 'Invalid credentials.' })
     async login(@Body() loginUserDto: LoginUserDto) {
-        const user = await this.usersService.login(loginUserDto.email, loginUserDto.password);
-        if (user) {
-            const token = await auth.createCustomToken(user.firebaseUid);
-            return { token };
-        }
-        throw new UnauthorizedException('Invalid credentials');
-    }
-
-    @Post('verify')
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Verify user token' })
-    @ApiResponse({ status: 200, description: 'Token successfully verified.' })
-    @ApiResponse({ status: 401, description: 'Invalid or no token provided.' })
-    async verify(@Req() req: AuthenticatedRequest) {
-        const token = req.headers.authorization?.split('Bearer ')[1];
-        if (!token) {
-            throw new UnauthorizedException('No token provided');
-        }
-        try {
-            const decodedToken = await auth.verifyIdToken(token);
-            return { decodedToken };
-        } catch (error) {
-            throw new UnauthorizedException('Invalid token');
-        }
+        return this.usersService.login(loginUserDto.email, loginUserDto.password);
     }
 
     @Put(':id')

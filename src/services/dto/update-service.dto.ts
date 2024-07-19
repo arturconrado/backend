@@ -23,7 +23,7 @@ export class UpdateServiceDto {
     userId?: string;
 
     @ApiProperty({ example: 456, description: 'The ID of the professional assigned to the service', required: false })
-    @IsNumber()
+    @IsString()
     @IsOptional()
-    professionalId?: number;
+    professionalId?: string;
 }

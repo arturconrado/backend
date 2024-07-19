@@ -1,61 +1,48 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import * as bcrypt from 'bcryptjs';
+import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from './dto/create-user.dto';
-import { auth } from '../firebaseAdminConfig';
-import { UpdateUserDto } from './dto/update-user.dto';
+import * as bcrypt from 'bcrypt';
+import { JwtPayload } from '../auth/jwt.payload';
 
 @Injectable()
 export class UsersService {
-    constructor(private prisma: PrismaService) {}
+    constructor(private prisma: PrismaService, private jwtService: JwtService) {}
 
-    async create(data: CreateUserDto) {
-        const hashedPassword = await bcrypt.hash(data.password, 10);
-        const firebaseUser = await auth.createUser({
-            email: data.email,
-            password: data.password,
-        });
-        return this.prisma.user.create({
+    async create(createUserDto: CreateUserDto) {
+        const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+        const user = await this.prisma.user.create({
             data: {
-                ...data,
+                ...createUserDto,
                 password: hashedPassword,
-                firebaseUid: firebaseUser.uid,
             },
         });
-    }
-
-    async findAll() {
-        return this.prisma.user.findMany();
-    }
-
-    async findOne(id: string) {
-        return this.prisma.user.findUnique({
-            where: { id },
-        });
-    }
-
-    async update(id: string, data: UpdateUserDto) {
-        return this.prisma.user.update({
-            where: { id },
-            data,
-        });
-    }
-
-    async remove(id: string) {
-        const user = await this.prisma.user.findUnique({ where: { id } });
-        if (user) {
-            await auth.deleteUser(user.firebaseUid);
-        }
-        return this.prisma.user.delete({
-            where: { id },
-        });
+        return user;
     }
 
     async login(email: string, password: string) {
         const user = await this.prisma.user.findUnique({ where: { email } });
-        if (user && user.password && (await bcrypt.compare(password, user.password))) {
-            return user;
+        if (!user || !(await bcrypt.compare(password, user.password ?? ''))) {
+            throw new UnauthorizedException('Invalid credentials');
         }
-        throw new UnauthorizedException('Invalid credentials');
+        const payload: JwtPayload = { id: user.id, email: user.email };
+        return {
+            ...user,
+            access_token: this.jwtService.sign(payload),
+        };
+    }
+
+    async findOne(id: string) {
+        return this.prisma.user.findUnique({ where: { id } });
+    }
+
+    async update(id: string, updateUserDto: any) {
+        if (updateUserDto.password) {
+            updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+        }
+        return this.prisma.user.update({
+            where: { id },
+            data: updateUserDto,
+        });
     }
 }

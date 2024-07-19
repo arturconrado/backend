@@ -8,13 +8,19 @@ import { auth } from '../firebaseAdminConfig';
 export class ServicesService {
     constructor(private prisma: PrismaService) {}
 
-    async create(data: CreateServiceDto, userId: string) {
-        console.log('CreateServiceDto:', data);  // Log do payload recebido
+    async create(data: CreateServiceDto) {
+        const userId = data.userId; // Pega o userId do payload
 
         // Verificar se o usuário existe no Firebase
         const userRecord = await auth.getUser(userId);
         if (!userRecord) {
             throw new NotFoundException('User not found in Firebase');
+        }
+
+        // Verificar se o usuário existe no banco de dados do Prisma
+        const userExists = await this.prisma.user.findUnique({ where: { id: userId } });
+        if (!userExists) {
+            throw new NotFoundException('User not found in Prisma');
         }
 
         // Verificar se o profissional existe (se fornecido)
@@ -32,29 +38,13 @@ export class ServicesService {
             title: data.title,
             description: data.description,
             price: data.price,
-            user: {
-                connectOrCreate: {
-                    where: { firebaseUid: userRecord.uid },
-                    create: {
-                        firebaseUid: userRecord.uid,
-                        email: userRecord.email,
-                    },
-                },
-            },
+            userId: userExists.id, // Associa o userId corretamente ao serviço
             schedules: {
                 create: {
                     title: data.title,
                     description: data.description,
                     date: new Date(data.date),
-                    user: {
-                        connectOrCreate: {
-                            where: { firebaseUid: userRecord.uid },
-                            create: {
-                                firebaseUid: userRecord.uid,
-                                email: userRecord.email,
-                            },
-                        },
-                    },
+                    userId: userExists.id, // Associa o userId corretamente ao agendamento
                 },
             },
         };
@@ -76,8 +66,14 @@ export class ServicesService {
         });
     }
 
-    async findAll() {
+    async findAllByUserId(userId: string) {
+        const userExists = await this.prisma.user.findUnique({ where: { id: userId } });
+        if (!userExists) {
+            throw new NotFoundException('User not found in Prisma');
+        }
+
         return this.prisma.service.findMany({
+            where: { userId: userExists.id },
             include: {
                 schedules: true,
                 user: true,
@@ -86,7 +82,7 @@ export class ServicesService {
         });
     }
 
-    async findOne(id: number) {
+    async findOne(id: string) {
         return this.prisma.service.findUnique({
             where: { id },
             include: {
@@ -97,21 +93,20 @@ export class ServicesService {
         });
     }
 
-    async update(id: number, data: UpdateServiceDto) {
+    async update(id: string, data: UpdateServiceDto) {
         return this.prisma.service.update({
             where: { id },
             data,
         });
     }
 
-    async remove(id: number) {
+    async remove(id: string) {
         return this.prisma.service.delete({
             where: { id },
         });
     }
 
-    async acceptService(serviceId: number, professionalId: number) {
-        // Verificar se o profissional existe
+    async acceptService(serviceId: string, professionalId: string) {
         const professional = await this.prisma.professional.findUnique({
             where: { id: professionalId },
         });

@@ -1,28 +1,23 @@
 import { Injectable, NestMiddleware, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { Request, Response, NextFunction } from 'express';
-import { auth } from '../firebaseAdminConfig';
-
-interface AuthenticatedRequest extends Request {
-    user?: any;
-}
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
-    async use(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-        const token = req.headers.authorization?.split('Bearer ')[1];
-        console.log('Token recebido:', token);
+    constructor(private readonly jwtService: JwtService) {}
 
-        if (!token) {
-            throw new UnauthorizedException('No token provided');
+    async use(req: Request, res: Response, next: NextFunction) {
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+            throw new UnauthorizedException('Authorization header is missing');
         }
 
+        const token = authHeader.split(' ')[1];
         try {
-            const decodedToken = await auth.verifyIdToken(token);
-            console.log('Token decodificado:', decodedToken);
-            req.user = decodedToken;
+            const decoded = this.jwtService.verify(token, { secret: process.env.JWT_SECRET || 'defaultSecret' });
+            req.user = decoded;
             next();
-        } catch (error: any) {
-            console.log('Erro na verificação do token:', error.message);
+        } catch (err) {
             throw new UnauthorizedException('Invalid token');
         }
     }

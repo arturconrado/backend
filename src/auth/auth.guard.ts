@@ -1,36 +1,30 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
+import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(private jwtService: JwtService, private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request: Request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
-
-    console.log('Token recebido:', token);
-
     if (!token) {
-      console.log('Token não encontrado');
-      throw new UnauthorizedException('Token não encontrado');
+      throw new UnauthorizedException('Token not found');
     }
-
     try {
-      const payload = await this.jwtService.verifyAsync(token);
-      console.log('Payload verificado:', payload);
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: process.env.JWT_SECRET || 'defaultSecret',
+      });
       request.user = payload;
-    } catch (error: any) {
-      console.log('Erro na verificação do token:', error.message);
-      throw new UnauthorizedException('Token inválido');
+    } catch {
+      throw new UnauthorizedException('Invalid token');
     }
-
     return true;
   }
 
-  private extractTokenFromHeader(request: Request): string | null {
-    const [type, token] = (request.headers.authorization || '').split(' ');
-    return type === 'Bearer' ? token : null;
+  private extractTokenFromHeader(request: any): string | undefined {
+    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
   }
 }

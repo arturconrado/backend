@@ -19,7 +19,6 @@ model User {
   feedbacks     Feedback[] // Feedbacks given by the user
   receivedFeedbacks Feedback[] @relation("ReceivedFeedbacks")
   role          Role       @default(USER)
-  firebaseUid   String     @unique
 }
 
 model Professional {
@@ -29,12 +28,12 @@ model Professional {
   password        String
   profession      String
   latitude        Float?
-  role          Role       @default(PROFESSIONAL)
   longitude       Float?
   schedules       Schedule[]
   services        Service[]
   feedbacks       Feedback[]
   receivedFeedbacks Feedback[] @relation("ProfessionalReceivedFeedbacks")
+  role            Role         @default(PROFESSIONAL)
 }
 
 model Service {

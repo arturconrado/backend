@@ -19,8 +19,8 @@ export class CreateFeedbackDto {
 
     @ApiProperty({ example: 1, description: 'The ID of the professional associated with the feedback', required: false })
     @IsOptional()
-    @IsInt()
-    professionalId?: number;
+    @IsString()
+    professionalId?: string;
 
     @ApiProperty({ example: 1, description: 'The ID of the service associated with the feedback', required: false })
     @IsOptional()
@@ -34,6 +34,6 @@ export class CreateFeedbackDto {
 
     @ApiProperty({ example: 2, description: 'The ID of the target professional for the feedback', required: false })
     @IsOptional()
-    @IsInt()
-    targetProfessionalId?: number;
+    @IsString()
+    targetProfessionalId?: string;
 }

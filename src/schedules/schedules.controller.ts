@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Patch } from '@nestjs/common';
 import { SchedulesService } from './schedules.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
@@ -29,7 +29,7 @@ export class SchedulesController {
     @ApiResponse({ status: 200, description: 'Schedule successfully retrieved.' })
     @ApiResponse({ status: 404, description: 'Schedule not found.' })
     findOne(@Param('id') id: string) {
-        return this.schedulesService.findOne(+id);
+        return this.schedulesService.findOne(id);
     }
 
     @Patch(':id')
@@ -37,7 +37,7 @@ export class SchedulesController {
     @ApiResponse({ status: 200, description: 'Schedule successfully updated.' })
     @ApiResponse({ status: 404, description: 'Schedule not found.' })
     update(@Param('id') id: string, @Body() updateScheduleDto: UpdateScheduleDto) {
-        return this.schedulesService.update(+id, updateScheduleDto);
+        return this.schedulesService.update(id, updateScheduleDto);
     }
 
     @Delete(':id')
@@ -45,17 +45,14 @@ export class SchedulesController {
     @ApiResponse({ status: 200, description: 'Schedule successfully deleted.' })
     @ApiResponse({ status: 404, description: 'Schedule not found.' })
     remove(@Param('id') id: string) {
-        return this.schedulesService.remove(+id);
+        return this.schedulesService.remove(id);
     }
 
     @Patch(':id/assign')
     @ApiOperation({ summary: 'Assign a professional to a schedule' })
     @ApiResponse({ status: 200, description: 'Professional successfully assigned.' })
-    @ApiResponse({ status: 404, description: 'Schedule or professional not found.' })
-    assignProfessional(
-        @Param('id') id: string,
-        @Body('professionalId') professionalId: number,
-    ) {
-        return this.schedulesService.assignProfessional(+id, professionalId);
+    @ApiResponse({ status: 404, description: 'Schedule or Professional not found.' })
+    assignProfessional(@Param('id') id: string, @Body('professionalId') professionalId: string) {
+        return this.schedulesService.assignProfessional(id, professionalId);
     }
 }

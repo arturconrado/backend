@@ -1,14 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { UsersService } from '../users/users.service';
+import { JwtPayload } from './jwt.payload';
 
 @Injectable()
 export class AuthService {
-    constructor(private jwtService: JwtService) {}
+    constructor(
+        private usersService: UsersService,
+        private jwtService: JwtService
+    ) {}
 
     async login(user: any) {
-        const payload = { id: user.id };
+        const payload: JwtPayload = { id: user.id, email: user.email };
         const token = this.jwtService.sign(payload);
-        console.log('Token gerado:', token);
         return {
             access_token: token,
         };
@@ -18,7 +22,7 @@ export class AuthService {
         try {
             return await this.jwtService.verifyAsync(token);
         } catch (error) {
-            throw new Error('Token inválido');
+            throw new Error('Invalid token');
         }
     }
 }

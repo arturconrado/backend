@@ -22,20 +22,20 @@ export class ProfessionalsService {
         return this.prisma.professional.findMany();
     }
 
-    async findOne(id: number) {
+    async findOne(id: string) {
         return this.prisma.professional.findUnique({
             where: { id },
         });
     }
 
-    async update(id: number, data: UpdateProfessionalDto) {
+    async update(id: string, data: UpdateProfessionalDto) {
         return this.prisma.professional.update({
             where: { id },
             data,
         });
     }
 
-    async remove(id: number) {
+    async remove(id: string) {
         return this.prisma.professional.delete({
             where: { id },
         });
