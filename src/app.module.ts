@@ -6,6 +6,7 @@ import { SchedulesModule } from './schedules/schedules.module';
 import { ProfessionalsModule } from './professionals/professionals.module';
 import { AuthModule } from './auth/auth.module';
 import {AuthMiddleware} from "./middleware/authMiddleware";
+import { FeedbackModule } from './feedback/feedback.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import {AuthMiddleware} from "./middleware/authMiddleware";
     SchedulesModule,
     ProfessionalsModule,
     AuthModule,
+    FeedbackModule,
   ],
 })
 export class AppModule implements NestModule {

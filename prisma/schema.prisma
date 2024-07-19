@@ -8,49 +8,78 @@ generator client {
 }
 
 model User {
-  id          String     @id @default(uuid())
-  email       String     @unique
-  password    String?
-  name        String?
-  services    Service[]
-  schedules   Schedule[]
-  role        Role       @default(USER)
-  firebaseUid String     @unique
+  id            String     @id @default(uuid())
+  email         String     @unique
+  password      String?
+  name          String?
+  latitude      Float?
+  longitude     Float?
+  services      Service[]
+  schedules     Schedule[]
+  feedbacks     Feedback[] // Feedbacks given by the user
+  receivedFeedbacks Feedback[] @relation("ReceivedFeedbacks")
+  role          Role       @default(USER)
+  firebaseUid   String     @unique
 }
 
 model Professional {
-  id          Int       @id @default(autoincrement())
-  name        String
-  email       String    @unique
-  password    String
-  profession  String
-  schedules   Schedule[]
-  services    Service[]
+  id              String       @id @default(uuid())
+  name            String
+  email           String       @unique
+  password        String
+  profession      String
+  latitude        Float?
+  role          Role       @default(PROFESSIONAL)
+  longitude       Float?
+  schedules       Schedule[]
+  services        Service[]
+  feedbacks       Feedback[]
+  receivedFeedbacks Feedback[] @relation("ProfessionalReceivedFeedbacks")
 }
 
 model Service {
-  id             Int           @id @default(autoincrement())
+  id             String        @id @default(uuid())
   title          String
   description    String
   price          Float
+  latitude       Float?
+  longitude      Float?
   userId         String
-  professionalId Int?
+  professionalId String?
   user           User          @relation(fields: [userId], references: [id])
   professional   Professional? @relation(fields: [professionalId], references: [id])
   schedules      Schedule[]
+  feedbacks      Feedback[]
 }
 
 model Schedule {
-  id              Int           @id @default(autoincrement())
+  id              String        @id @default(uuid())
   title           String
   description     String
   date            DateTime
   userId          String
   user            User          @relation(fields: [userId], references: [id])
-  professionalId  Int?
+  professionalId  String?
   professional    Professional? @relation(fields: [professionalId], references: [id])
-  serviceId       Int
+  serviceId       String
   service         Service       @relation(fields: [serviceId], references: [id])
+}
+
+model Feedback {
+  id              String        @id @default(uuid())
+  rating          Int
+  comment         String
+  createdAt       DateTime      @default(now())
+  userId          String?
+  user            User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  professionalId  String?
+  professional    Professional? @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  serviceId       String?
+  service         Service?      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  targetUserId    String?
+  targetUser      User?         @relation("ReceivedFeedbacks", fields: [targetUserId], references: [id], onDelete: Cascade)
+  targetProfessionalId String?
+  targetProfessional Professional? @relation("ProfessionalReceivedFeedbacks", fields: [targetProfessionalId], references: [id], onDelete: Cascade)
 }
 
 enum Role {
