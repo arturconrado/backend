@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { ServicesService } from './services.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
@@ -17,7 +17,11 @@ export class ServicesController {
     @ApiResponse({ status: 201, description: 'Service successfully created.' })
     @ApiResponse({ status: 401, description: 'User not authenticated.' })
     create(@Body() createServiceDto: CreateServiceDto, @Req() req: any) {
-        return this.servicesService.create(createServiceDto, req.user.id);
+        const user = req.user;
+        if (user.role === 'PROFESSIONAL') {
+            throw new ForbiddenException('Professionals cannot create services');
+        }
+        return this.servicesService.create(createServiceDto, user.id);
     }
 
     @Get()
@@ -30,7 +34,7 @@ export class ServicesController {
         if (!req.user || !req.user.id) {
             throw new UnauthorizedException('User not authenticated');
         }
-        return this.servicesService.findAllByUserId(req.user.id);
+        return this.servicesService.findAllByUserId(req.user.id, req.user.role);
     }
 
     @Get(':id')

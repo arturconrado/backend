@@ -1,53 +1,69 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
-import { JwtService } from '@nestjs/jwt';
 import { Role } from '@prisma/client';
-import {CreateUserDto} from "./dto/create-user.dto";
-import {UpdateUserDto} from "./dto/update-user.dto";
 
 @Injectable()
 export class UsersService {
-    constructor(
-        private readonly prisma: PrismaService,
-        private readonly jwtService: JwtService,
-    ) {}
+    constructor(private prisma: PrismaService) {}
 
     async create(createUserDto: CreateUserDto) {
         const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-        return this.prisma.user.create({
-            data: {
-                email: createUserDto.email,
-                password: hashedPassword,
-                role: createUserDto.role,
-            },
+        const data: any = {
+            email: createUserDto.email,
+            password: hashedPassword,
+            role: createUserDto.role,
+            latitude: createUserDto.latitude ? parseFloat(createUserDto.latitude) : undefined,
+            longitude: createUserDto.longitude ? parseFloat(createUserDto.longitude) : undefined,
+        };
+
+        if (createUserDto.name) {
+            data.name = createUserDto.name;
+        }
+
+        if (createUserDto.role === Role.USER) {
+            return this.prisma.user.create({
+                data,
+            });
+        } else if (createUserDto.role === Role.PROFESSIONAL) {
+            return this.prisma.professional.create({
+                data,
+            });
+        }
+    }
+
+    async findByEmail(email: string) {
+        const user = await this.prisma.user.findUnique({
+            where: { email },
+        });
+        if (user) return user;
+
+        return this.prisma.professional.findUnique({
+            where: { email },
         });
     }
 
-    async login(email: string, password: string, role: Role) {
-        const user = await this.findByEmail(email, role);
-        if (!user || !user.password || !(await bcrypt.compare(password, user.password))) {
-            throw new UnauthorizedException('Invalid credentials');
-        }
-
-        const payload = { email: user.email, sub: user.id, role: user.role };
-        return {
-            access_token: this.jwtService.sign(payload),
-        };
-    }
-
-    async findByEmail(email: string, role: Role) {
-        return this.prisma.user.findFirst({ where: { email, role } });
-    }
-
     async findById(id: string) {
-        return this.prisma.user.findUnique({ where: { id } });
+        const user = await this.prisma.user.findUnique({
+            where: { id },
+        });
+        if (user) return user;
+
+        return this.prisma.professional.findUnique({
+            where: { id },
+        });
     }
 
-    async updateUser(id: string, updateUserDto: UpdateUserDto) {
+    async update(id: string, updateUserDto: UpdateUserDto) {
         return this.prisma.user.update({
             where: { id },
-            data: updateUserDto,
+            data: {
+                ...updateUserDto,
+                latitude: updateUserDto.latitude ? parseFloat(updateUserDto.latitude) : undefined,
+                longitude: updateUserDto.longitude ? parseFloat(updateUserDto.longitude) : undefined,
+            },
         });
     }
 }

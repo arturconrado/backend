@@ -1,9 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { Role } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
-import {CreateUserDto} from "../users/dto/create-user.dto";
+import * as bcrypt from 'bcrypt'
 
 @Injectable()
 export class AuthService {
@@ -13,19 +12,26 @@ export class AuthService {
     ) {}
 
     async validateUser(email: string, pass: string): Promise<any> {
-        const user = await this.usersService.findByEmail(email, Role.USER); // ou Role.PROFESSIONAL
-        if (user && user.password && await bcrypt.compare(pass, user.password)) {
+        const user = await this.usersService.findByEmail(email);
+        if (user && await bcrypt.compare(pass, user.password ?? '')) {
             const { password, ...result } = user;
             return result;
         }
         return null;
     }
 
-    async login(email: string, password: string, role: Role) {
-        return this.usersService.login(email, password, role);
+    async login(user: any) {
+        const payload = { email: user.email, sub: user.id, role: user.role };
+        return {
+            access_token: this.jwtService.sign(payload),
+        };
     }
 
-    async register(createUserDto: CreateUserDto) {
-        return this.usersService.create(createUserDto);
+    async validateJwtPayload(payload: any) {
+        const user = await this.usersService.findById(payload.sub);
+        if (user && user.role === payload.role) {
+            return user;
+        }
+        return null;
     }
 }
