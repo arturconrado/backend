@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString, IsOptional, IsDateString } from 'class-validator';
+import {IsNotEmpty, IsNumber, IsString, IsOptional, IsDateString, IsDate} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateServiceDto {
@@ -27,4 +27,9 @@ export class CreateServiceDto {
     @IsString() // Ensure it's `string` not `String`
     @IsNotEmpty()
     date!: string;
+
+    @ApiProperty({ example: '2023-07-20T14:30:00Z', description: 'The service is expirated' })
+    @IsOptional()
+    @IsDate()
+    expiresAt?: Date;
 }

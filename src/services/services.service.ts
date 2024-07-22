@@ -1,9 +1,10 @@
-// services.service.ts
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { Role } from '@prisma/client';
+import { addMinutes, parseISO, format } from 'date-fns';
+import { fromZonedTime } from 'date-fns-tz';
 
 @Injectable()
 export class ServicesService {
@@ -22,10 +23,16 @@ export class ServicesService {
             throw new ForbiddenException('Professionals cannot create services');
         }
 
+        // Converta a data fornecida para UTC
+        const dateInUtc = fromZonedTime(parseISO(createServiceDto.date), 'America/Sao_Paulo');
+        const expiresAt = addMinutes(dateInUtc, 2); // Ajuste para 2 minutos
+
         return this.prisma.service.create({
             data: {
                 ...createServiceDto,
+                date: dateInUtc.toISOString(), // Certifique-se de armazenar a data em UTC
                 userId: user.id,
+                expiresAt: expiresAt.toISOString(), // Armazene expiresAt em UTC
             },
         });
     }
@@ -62,6 +69,21 @@ export class ServicesService {
         return this.prisma.service.update({
             where: { id: serviceId },
             data: { professionalId },
+        });
+    }
+
+    async expireServices() {
+        const now = new Date();
+        await this.prisma.service.updateMany({
+            where: {
+                isActive: true,
+                expiresAt: {
+                    lte: now,
+                },
+            },
+            data: {
+                isActive: false,
+            },
         });
     }
 }

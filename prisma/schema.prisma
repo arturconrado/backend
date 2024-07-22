@@ -52,6 +52,7 @@ model Service {
   date           String
   isActive       Boolean       @default(true)
   createdAt      DateTime      @default(now())
+  expiresAt      DateTime?
 }
 
 model Schedule {
