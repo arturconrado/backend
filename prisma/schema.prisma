@@ -8,31 +8,31 @@ generator client {
 }
 
 model User {
-  id            String     @id @default(uuid())
-  email         String     @unique
-  password      String
-  name          String?
-  latitude      Float?
-  longitude     Float?
-  role          Role       @default(USER)
-  services      Service[]
-  schedules     Schedule[]
-  feedbacks     Feedback[]
+  id                String     @id @default(uuid())
+  email             String     @unique
+  password          String
+  name              String?
+  latitude          Float?
+  longitude         Float?
+  role              Role       @default(USER)
+  services          Service[]
+  schedules         Schedule[]
+  feedbacks         Feedback[]
   receivedFeedbacks Feedback[] @relation("ReceivedFeedbacks")
 }
 
 model Professional {
-  id              String       @id @default(uuid())
-  email           String       @unique
-  password        String
-  name            String?
-  profession      String
-  latitude        Float?
-  longitude       Float?
-  role            Role         @default(PROFESSIONAL)
-  services        Service[]
-  schedules       Schedule[]
-  feedbacks       Feedback[]
+  id                String     @id @default(uuid())
+  email             String     @unique
+  password          String
+  name              String?
+  profession        String
+  latitude          Float?
+  longitude         Float?
+  role              Role       @default(PROFESSIONAL)
+  services          Service[]
+  schedules         Schedule[]
+  feedbacks         Feedback[]
   receivedFeedbacks Feedback[] @relation("ProfessionalReceivedFeedbacks")
 }
 
@@ -50,36 +50,40 @@ model Service {
   schedules      Schedule[]
   feedbacks      Feedback[]
   date           String
+  isActive       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
 }
 
 model Schedule {
-  id              String        @id @default(uuid())
-  title           String
-  description     String
-  date            String
-  userId          String
-  user            User          @relation(fields: [userId], references: [id])
-  professionalId  String?
-  professional    Professional? @relation(fields: [professionalId], references: [id])
-  serviceId       String
-  service         Service       @relation(fields: [serviceId], references: [id])
+  id             String        @id @default(uuid())
+  title          String
+  description    String
+  date           String
+  userId         String
+  user           User          @relation(fields: [userId], references: [id])
+  professionalId String?
+  professional   Professional? @relation(fields: [professionalId], references: [id])
+  serviceId      String
+  service        Service       @relation(fields: [serviceId], references: [id])
+  isActive       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
 }
 
 model Feedback {
-  id              String        @id @default(uuid())
-  rating          Int
-  comment         String
-  createdAt       DateTime      @default(now())
-  userId          String?
-  user            User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  professionalId  String?
-  professional    Professional? @relation(fields: [professionalId], references: [id], onDelete: Cascade)
-  serviceId       String?
-  service         Service?      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  targetUserId    String?
-  targetUser      User?         @relation("ReceivedFeedbacks", fields: [targetUserId], references: [id], onDelete: Cascade)
+  id                   String        @id @default(uuid())
+  rating               Int
+  comment              String
+  createdAt            DateTime      @default(now())
+  userId               String?
+  user                 User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  professionalId       String?
+  professional         Professional? @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  serviceId            String?
+  service              Service?      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  targetUserId         String?
+  targetUser           User?         @relation("ReceivedFeedbacks", fields: [targetUserId], references: [id], onDelete: Cascade)
   targetProfessionalId String?
-  targetProfessional Professional? @relation("ProfessionalReceivedFeedbacks", fields: [targetProfessionalId], references: [id], onDelete: Cascade)
+  targetProfessional   Professional? @relation("ProfessionalReceivedFeedbacks", fields: [targetProfessionalId], references: [id], onDelete: Cascade)
 }
 
 enum Role {

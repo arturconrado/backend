@@ -29,7 +29,10 @@ export class UsersService {
             });
         } else if (createUserDto.role === Role.PROFESSIONAL) {
             return this.prisma.professional.create({
-                data,
+                data: {
+                    ...data,
+                    profession: createUserDto.profession,
+                },
             });
         }
     }
