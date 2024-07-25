@@ -19,6 +19,8 @@ model User {
   schedules         Schedule[]
   feedbacks         Feedback[]
   receivedFeedbacks Feedback[] @relation("ReceivedFeedbacks")
+  messages          Message[]  @relation("UserMessages")
+  chats             Chat[]     @relation("UserChats")
 }
 
 model Professional {
@@ -34,6 +36,8 @@ model Professional {
   schedules         Schedule[]
   feedbacks         Feedback[]
   receivedFeedbacks Feedback[] @relation("ProfessionalReceivedFeedbacks")
+  messages          Message[]  @relation("ProfessionalMessages")
+  chats             Chat[]     @relation("ProfessionalChats")
 }
 
 model Service {
@@ -53,6 +57,7 @@ model Service {
   isActive       Boolean       @default(true)
   createdAt      DateTime      @default(now())
   expiresAt      DateTime?
+  chats          Chat[]
 }
 
 model Schedule {
@@ -85,6 +90,30 @@ model Feedback {
   targetUser           User?         @relation("ReceivedFeedbacks", fields: [targetUserId], references: [id], onDelete: Cascade)
   targetProfessionalId String?
   targetProfessional   Professional? @relation("ProfessionalReceivedFeedbacks", fields: [targetProfessionalId], references: [id], onDelete: Cascade)
+}
+
+model Chat {
+  id             String        @id @default(uuid())
+  serviceId      String        @unique
+  service        Service       @relation(fields: [serviceId], references: [id])
+  userId         String
+  user           User          @relation("UserChats", fields: [userId], references: [id])
+  professionalId String
+  professional   Professional  @relation("ProfessionalChats", fields: [professionalId], references: [id])
+  messages       Message[]
+}
+
+model Message {
+  id                  String        @id @default(uuid())
+  chatId              String
+  senderUserId        String?
+  senderProfessionalId String?
+  senderRole          Role
+  message             String
+  createdAt           DateTime      @default(now())
+  chat                Chat          @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  senderUser          User?         @relation("UserMessages", fields: [senderUserId], references: [id], onDelete: Cascade)
+  senderProfessional  Professional? @relation("ProfessionalMessages", fields: [senderProfessionalId], references: [id], onDelete: Cascade)
 }
 
 enum Role {

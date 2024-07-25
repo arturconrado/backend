@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import {Injectable, UnauthorizedException} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { Role } from '@prisma/client';
@@ -26,6 +26,20 @@ export class AuthService {
             access_token: this.jwtService.sign(payload),
         };
     }
+
+    async validateToken(token: string) {
+        try {
+            const payload = this.jwtService.verify(token);
+            const user = await this.validateJwtPayload(payload);
+            if (!user) {
+                throw new UnauthorizedException('Invalid token');
+            }
+            return user;
+        } catch (error) {
+            throw new UnauthorizedException('Invalid token');
+        }
+    }
+
 
     async validateJwtPayload(payload: any) {
         const user = await this.usersService.findById(payload.sub);

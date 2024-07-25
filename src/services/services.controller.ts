@@ -81,7 +81,11 @@ export class ServicesController {
     @ApiOperation({ summary: 'Accept a service by ID' })
     @ApiResponse({ status: 200, description: 'Service successfully accepted.' })
     @ApiResponse({ status: 404, description: 'Service not found.' })
-    acceptService(@Param('id') id: string, @Body() body: { professionalId: string }) {
-        return this.servicesService.acceptService(id, body.professionalId);
+    async acceptService(@Param('id') id: string, @Req() req: any) {
+        const professional = req.user;
+        if (professional.role !== 'PROFESSIONAL') {
+            throw new ForbiddenException('Only professionals can accept services');
+        }
+        return this.servicesService.acceptService(id, professional.id);
     }
 }

@@ -1,9 +1,9 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { Role } from '@prisma/client';
-import { addMinutes, parseISO, format } from 'date-fns';
+import { addMinutes, parseISO } from 'date-fns';
 import { fromZonedTime } from 'date-fns-tz';
 
 @Injectable()
@@ -23,9 +23,8 @@ export class ServicesService {
             throw new ForbiddenException('Professionals cannot create services');
         }
 
-        // Converta a data fornecida para UTC
-        const dateInUtc = fromZonedTime(parseISO(createServiceDto.date), 'America/Sao_Paulo');
-        const expiresAt = addMinutes(dateInUtc, 2); // Ajuste para 2 minutos
+        const dateInUtc = fromZonedTime(createServiceDto.date, 'America/Sao_Paulo');
+        const expiresAt = addMinutes(dateInUtc, 20); // Ajuste para 2 minutos
 
         return this.prisma.service.create({
             data: {
@@ -66,9 +65,28 @@ export class ServicesService {
     }
 
     async acceptService(serviceId: string, professionalId: string) {
+        // Verificar se o serviço existe
+        const service = await this.prisma.service.findUnique({
+            where: { id: serviceId },
+        });
+
+        if (!service) {
+            throw new NotFoundException('Service not found');
+        }
+
+        // Verificar se o profissional existe
+        const professional = await this.prisma.professional.findUnique({
+            where: { id: professionalId },
+        });
+
+        if (!professional) {
+            throw new NotFoundException('Professional not found');
+        }
+
+        // Atualizar o serviço com o ID do profissional
         return this.prisma.service.update({
             where: { id: serviceId },
-            data: { professionalId },
+            data: { professionalId, isActive: true },
         });
     }
 

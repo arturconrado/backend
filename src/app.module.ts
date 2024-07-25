@@ -7,6 +7,7 @@ import { ProfessionalsModule } from './professionals/professionals.module';
 import { AuthModule } from './auth/auth.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { AuthMiddleware } from './middleware/authMiddleware';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
     imports: [
@@ -17,6 +18,7 @@ import { AuthMiddleware } from './middleware/authMiddleware';
         ProfessionalsModule,
         AuthModule,
         FeedbackModule,
+        ChatModule,
     ],
 })
 export class AppModule implements NestModule {
